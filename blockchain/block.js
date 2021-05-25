@@ -13,13 +13,21 @@ function lorenzSystem( sigma, rho, beta, d) {
       y2 = x * (rho - z) - y,
       z2 = x * y - (beta * z);
   // Returns cartesian distance squared for lorenz system at a point in time
-
-  if((x2 + y2 + z2)*(x2+y2+z2) % 4001 || Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000) <= 0){
+  
+  if((x2 + y2 + z2)*(x2+y2+z2) % 4001 == 0|| Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000) <= 0){
     return 1;
   }
 
+  var c = 1;
+  if( ((x2 + y2 + z2)*(x2+y2+z2)/10000) %2 ==0){
+    c = 10;
+    if( ((x2 + y2 + z2)*(x2+y2+z2)/10000) % 4== 0){
+      c= 100;
+    }
+  }
 
-  return Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000);
+
+  return Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000) *d.getDate()/c;
 }
 
 
@@ -78,7 +86,7 @@ class Block {
     var d = new Date(lastBlock.timestamp);
     if(d.getDay() > 5){//works special on friday and saturday
       difficulty = lorenzSystem(10, 28, 8/3, d);
-      //console.log("it is this hard", difficulty);
+      console.log("it is this hard", difficulty);
       return difficulty;
     }
     else{
