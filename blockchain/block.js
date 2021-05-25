@@ -1,6 +1,29 @@
 const ChainUtil = require('../chain-util');
 const { DIFFICULTY, MINE_RATE } = require('../config');
 
+
+function lorenzSystem( sigma, rho, beta, d) {
+  
+  var z = d.getSeconds();
+  var y = d.getMinutes();
+  var x = d.getHours();
+
+  
+   var x2 = sigma * (y - x),
+      y2 = x * (rho - z) - y,
+      z2 = x * y - (beta * z);
+  // Returns cartesian distance squared for lorenz system at a point in time
+
+  if((x2 + y2 + z2)*(x2+y2+z2) % 4001 || Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000) <= 0){
+    return 1;
+  }
+
+
+  return Math.floor((x2 + y2 + z2)*(x2+y2+z2)/10000);
+}
+
+
+
 class Block {
   constructor(timestamp, lastHash, hash, data, nonce, difficulty) {
     this.timestamp = timestamp;
@@ -22,7 +45,7 @@ class Block {
   }
 
   static genesis() {
-    return new this('Genesis time', '-----', 'f1r57-h45h', [], 0, DIFFICULTY);
+    return new this('In the begining', 'Liamisacoder', 'f1r57-h45h', [], 0, DIFFICULTY);
   }
 
   static mineBlock(lastBlock, data) {
@@ -52,9 +75,20 @@ class Block {
 
   static adjustDifficulty(lastBlock, currentTime) {
     let { difficulty } = lastBlock;
-    difficulty = lastBlock.timestamp + MINE_RATE > currentTime ?
-      difficulty + 1 : difficulty - 1;
-    return difficulty;
+    var d = new Date(lastBlock.timestamp);
+    if(d.getDay() > 5){//works special on friday and saturday
+      difficulty = lorenzSystem(10, 28, 8/3, d);
+      //console.log("it is this hard", difficulty);
+      return difficulty;
+    }
+    else{
+      
+      difficulty = lastBlock.timestamp + MINE_RATE > currentTime ?
+        difficulty + 1 : difficulty - 1;
+      return difficulty;
+    }
+
+  
   }
 }
 
